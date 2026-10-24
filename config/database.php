@@ -180,5 +180,41 @@ return [
         ],
 
     ],
+    'mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'bd_escolar_docker'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        'mysql_docente' => [
+    'driver' => 'mysql',
+    'url' => env('DB_DOCENTE_URL'),
+    'host' => env('DB_DOCENTE_HOST', '10.0.47.204'),
+    'port' => env('DB_DOCENTE_PORT', '3306'),
+    'database' => env('DB_DOCENTE_DATABASE', 'pro413_kernelitos'),
+    'username' => env('DB_DOCENTE_USERNAME', 'centellas_jose'),
+    'password' => env('DB_DOCENTE_PASSWORD', 'K_Cent4#Rq81'),
+    'unix_socket' => env('DB_SOCKET', ''),
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'strict' => true,
+    'engine' => null,
+    'options' => extension_loaded('pdo_mysql') ? array_filter([
+        PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+    ]) : [],
+],
 
 ];

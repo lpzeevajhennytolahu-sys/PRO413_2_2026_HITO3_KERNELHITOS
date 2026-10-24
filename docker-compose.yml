@@ -1,0 +1,36 @@
+services:
+  mysql-escolar:
+    image: mysql:8.0
+    container_name: mysql_escolar_docker
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root1234}
+      MYSQL_DATABASE: ${DB_DATABASE:-bd_escolar_docker}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_escolar_vol:/var/lib/mysql
+      - ./sql/01_bd_docker_estudiantes.sql:/docker-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app-escolar:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gestion-escolar:kernelhitos
+    container_name: laravel_gestion_escolar
+    restart: always
+    ports:
+      - "0.0.0.0:8082:8082"
+    env_file:
+      - .env
+    depends_on:
+      mysql-escolar:
+        condition: service_healthy
+
+volumes:
+  mysql_escolar_vol:
