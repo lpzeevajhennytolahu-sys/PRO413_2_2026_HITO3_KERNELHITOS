@@ -20,7 +20,6 @@
     const actividadMenu = root.querySelector('[data-ruta-actividad-menu]');
     const actividadLabel = root.querySelector('[data-ruta-actividad-label]');
     const actividadIco = root.querySelector('[data-ruta-actividad-ico]');
-    const agregarSelect = root.querySelector('[data-ruta-agregar]');
     const ficha = root.querySelector('[data-asistente-ficha]');
     const foto = root.querySelector('[data-asistente-foto]');
     const region = root.querySelector('[data-asistente-region]');
@@ -40,6 +39,9 @@
     const perfilInicio = root.querySelector('[data-ruta-perfil-inicio]');
     const perfilFin = root.querySelector('[data-ruta-perfil-fin]');
     const guardarBtn = root.querySelector('[data-ruta-guardar]');
+    const solicitarBtn = root.querySelector('[data-ruta-solicitar]');
+    const fechaInicioInput = root.querySelector('[data-ruta-inicio]');
+    const fechaFinInput = root.querySelector('[data-ruta-fin]');
     const panel = root.querySelector('[data-ruta-panel]');
     const panelPuntos = root.querySelector('[data-ruta-panel-puntos]');
     const panelLugares = root.querySelector('[data-ruta-panel-lugares]');
@@ -130,7 +132,12 @@
         if (distanciaHidden) distanciaHidden.value = dist.toFixed(2);
         if (desnivelHidden) desnivelHidden.value = Math.round(desnivel);
         if (paradasHidden) paradasHidden.value = String(waypoints.length);
-        if (guardarBtn) guardarBtn.disabled = waypoints.length < 2;
+        const lista = waypoints.length >= 2;
+        if (guardarBtn) guardarBtn.disabled = !lista;
+        if (solicitarBtn) {
+            const fechasOk = Boolean(fechaInicioInput?.value) && Boolean(fechaFinInput?.value);
+            solicitarBtn.disabled = !lista || !fechasOk;
+        }
     };
 
     const actualizarPerfil = (dist) => {
@@ -180,7 +187,7 @@
     const renderPuntos = () => {
         if (!listaPuntos) return;
         if (!waypoints.length) {
-            listaPuntos.innerHTML = '<li class="ruta-puntos-vacio" data-ruta-vacio>Todavía no hay paradas. Elige un lugar registrado o haz clic en el mapa.</li>';
+            listaPuntos.innerHTML = '<li class="ruta-puntos-vacio" data-ruta-vacio>Todavía no hay paradas. Elige solo lugares registrados (las bolitas del mapa o la lista).</li>';
             return;
         }
         listaPuntos.innerHTML = waypoints.map((p, i) => `
@@ -228,7 +235,8 @@
     };
 
     const agregarPunto = (punto) => {
-        const existe = waypoints.some((p) => p.slug && punto.slug && p.slug === punto.slug);
+        if (!punto?.slug || !lugares.some((item) => item.slug === punto.slug)) return;
+        const existe = waypoints.some((p) => p.slug === punto.slug);
         if (existe) return;
         waypoints.push({
             ...punto,
@@ -307,33 +315,10 @@
         if (elegir.dataset.slug) agregarLugar(elegir.dataset.slug);
     });
 
-    agregarSelect?.addEventListener('change', () => {
-        if (!agregarSelect.value) return;
-        agregarLugar(agregarSelect.value);
-        agregarSelect.value = '';
-    });
-
     listaPuntos?.addEventListener('click', (event) => {
         const btn = event.target.closest('[data-quitar]');
         if (!btn) return;
         quitarPunto(Number(btn.dataset.quitar));
-    });
-
-    mapa.on('click', (event) => {
-        if (event.originalEvent?.target?.closest('.asistente-marcador, .ruta-waypoint, .leaflet-popup')) return;
-        const cercano = lugares
-            .map((lugar) => ({ lugar, d: haversineKm({ lat: event.latlng.lat, lng: event.latlng.lng }, lugar) }))
-            .sort((a, b) => a.d - b.d)[0];
-        if (cercano && cercano.d < 40) {
-            agregarLugar(cercano.lugar.slug);
-            return;
-        }
-        agregarPunto({
-            nombre: `Punto ${waypoints.length + 1}`,
-            region: `${event.latlng.lat.toFixed(3)}, ${event.latlng.lng.toFixed(3)}`,
-            lat: event.latlng.lat,
-            lng: event.latlng.lng
-        });
     });
 
     destinoInput?.addEventListener('change', () => {
@@ -348,6 +333,8 @@
         event.preventDefault();
         destinoInput?.dispatchEvent(new Event('change'));
     });
+    fechaInicioInput?.addEventListener('change', () => syncForm());
+    fechaFinInput?.addEventListener('change', () => syncForm());
 
     root.querySelector('[data-ruta-deshacer]')?.addEventListener('click', () => {
         if (waypoints.length) quitarPunto(waypoints.length - 1);
@@ -370,12 +357,6 @@
             const esPuntos = tab.dataset.rutaTab === 'puntos';
             if (panelPuntos) panelPuntos.hidden = !esPuntos;
             if (panelLugares) panelLugares.hidden = esPuntos;
-        });
-    });
-
-    root.querySelectorAll('[data-ruta-modo]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            root.querySelectorAll('[data-ruta-modo]').forEach((b) => b.classList.toggle('activo', b === btn));
         });
     });
 

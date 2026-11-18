@@ -70,9 +70,18 @@ class CalendarioPerfilTest extends TestCase
     {
         $this->ingresar();
         Http::fake(['*/api/cliente/perfil' => Http::sequence()->push(['completitud' => ['completo' => false]])->push(['completitud' => ['completo' => true]])]);
-        $this->withSession(['continuar_solicitud' => true, 'viaje_borrador' => ['destinos' => 'Uyuni']])->from('/mi-viaje/perfil')->put('/mi-viaje/perfil', ['nombres' => 'Ana', 'apellidos' => 'Pérez'])
+        $perfilDatos = [
+            'nombres' => 'Ana',
+            'apellidos' => 'Pérez',
+            'codigoPais' => '+33',
+            'telefonoNumero' => '612345678',
+            'direccion' => 'Av. 16 de Julio 123',
+            'tipoDocumento' => 'Pasaporte',
+            'numeroDocumento' => 'ABC123456',
+        ];
+        $this->withSession(['continuar_solicitud' => true, 'viaje_borrador' => ['destinos' => 'Uyuni']])->from('/mi-viaje/perfil')->put('/mi-viaje/perfil', $perfilDatos)
             ->assertRedirect('/mi-viaje/perfil')->assertSessionHas('continuar_solicitud', true);
-        $this->put('/mi-viaje/perfil', ['nombres' => 'Ana', 'apellidos' => 'Pérez'])->assertRedirect(route('portal.solicitud'))->assertSessionMissing('continuar_solicitud')->assertSessionHas('viaje_borrador.destinos', 'Uyuni');
+        $this->put('/mi-viaje/perfil', $perfilDatos)->assertRedirect(route('portal.solicitud'))->assertSessionMissing('continuar_solicitud')->assertSessionHas('viaje_borrador.destinos', 'Uyuni');
     }
 
     public function test_mi_viaje_integra_chat_vertical_y_progreso_sin_mezclar_mensajes(): void

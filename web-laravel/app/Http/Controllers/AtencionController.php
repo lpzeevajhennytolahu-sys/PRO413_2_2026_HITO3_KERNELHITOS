@@ -50,9 +50,14 @@ class AtencionController extends Controller
         return back()->with('exito', 'Mensajes marcados como leídos.');
     }
 
-    public function index(): RedirectResponse
+    public function index(): View
     {
-        return redirect()->route('clientes.index');
+        $panel = $this->consultarApi('GET', '/api/atencion/panel');
+
+        return view('atencion.index', [
+            'solicitudes' => $panel['solicitudes'] ?? [],
+            'conversaciones' => $panel['conversaciones'] ?? [],
+        ]);
     }
 
     public function calendario(Request $request): View

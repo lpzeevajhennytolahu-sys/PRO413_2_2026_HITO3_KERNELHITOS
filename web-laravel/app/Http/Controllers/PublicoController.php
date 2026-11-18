@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PublicoController extends Controller
@@ -114,6 +116,56 @@ class PublicoController extends Controller
 
     public function guardarRuta(Request $request): RedirectResponse
     {
+        $ruta = $this->prepararRutaPersonalizada($request, exigirFechas: false);
+
+        if ($request->session()->get('usuario.rol') !== 'CLIENTE' || ! $request->session()->has('api_token')) {
+            return redirect()->route('acceso.registro')->with('exito', 'Guardamos tu ruta personalizada. Crea tu cuenta o ingresa para enviarla a tu asesor Thaki.');
+        }
+
+        $this->consultarApi('POST', '/api/cliente/mensajes', [
+            'contenido' => $this->documentoRutaTexto($ruta),
+        ]);
+
+        return redirect()->route('portal.mensajes')->with('exito', 'Enviamos tu mensaje con la ruta al chat del asesor. También puedes abrir el documento de la ruta.');
+    }
+
+    public function solicitarRuta(Request $request): RedirectResponse
+    {
+        $ruta = $this->prepararRutaPersonalizada($request, exigirFechas: true);
+
+        if ($request->session()->get('usuario.rol') !== 'CLIENTE' || ! $request->session()->has('api_token')) {
+            return redirect()->route('acceso.registro')->with('exito', 'Guardamos tu ruta. Crea tu cuenta o ingresa para mandar la solicitud a un asesor.');
+        }
+
+        $perfil = $this->consultarApi('GET', '/api/cliente/perfil');
+        $solicitud = [
+            'fechaInicio' => $ruta['fechaInicio'],
+            'fechaFin' => $ruta['fechaFin'],
+            'personas' => (int) ($ruta['personas'] ?? 2),
+            'presupuesto' => $ruta['presupuesto'] ?? null,
+            'moneda' => $ruta['moneda'] ?? 'USD',
+            'destinos' => implode(' · ', array_slice($ruta['paradasLista'], 0, 8)),
+            'intereses' => $this->documentoRutaTexto($ruta),
+            'hotel' => $ruta['hotel'] ?? null,
+            'alimentacion' => $ruta['alimentacion'] ?? null,
+            'transporte' => $ruta['transporte'] ?? null,
+        ];
+
+        if (! ($perfil['completitud']['completo'] ?? false)) {
+            $request->session()->put('viaje_borrador', $solicitud);
+            $request->session()->put('continuar_solicitud', true);
+
+            return redirect()->route('portal.perfil')->withErrors(['perfil' => 'Completa tu perfil al 100 % antes de enviar tu solicitud. Conservamos las preferencias de tu viaje.']);
+        }
+
+        $this->consultarApi('POST', '/api/cliente/solicitudes', $solicitud);
+        $request->session()->forget(['viaje_borrador', 'continuar_solicitud']);
+
+        return redirect()->route('portal.inicio')->with('exito', 'Mandamos tu solicitud de ruta. El asesor la verá en su bandeja de solicitudes.');
+    }
+
+    private function prepararRutaPersonalizada(Request $request, bool $exigirFechas): array
+    {
         $datos = $request->validate([
             'nombreRuta' => ['required', 'string', 'max:120'],
             'destinos' => ['required', 'string', 'max:2000'],
@@ -122,24 +174,42 @@ class PublicoController extends Controller
             'distanciaKm' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'desnivelM' => ['nullable', 'numeric', 'min:0', 'max:999999'],
             'paradas' => ['required', 'integer', 'min:2', 'max:50'],
-            'personas' => ['nullable', 'integer', 'min:1', 'max:1000'],
-            'moneda' => ['nullable', 'in:BOB,USD,EUR'],
-            'fechaInicio' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
-            'fechaFin' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:fechaInicio'],
+            'personas' => [$exigirFechas ? 'required' : 'nullable', 'integer', 'min:1', 'max:1000'],
+            'moneda' => [$exigirFechas ? 'required' : 'nullable', 'in:BOB,USD,EUR'],
+            'fechaInicio' => [$exigirFechas ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'fechaFin' => [$exigirFechas ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:fechaInicio'],
             'presupuesto' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
             'hotel' => ['nullable', 'string', 'max:200'],
             'alimentacion' => ['nullable', 'string', 'max:200'],
             'transporte' => ['nullable', 'string', 'max:200'],
         ], [
-            'destinos.required' => 'Añade al menos dos lugares a tu ruta antes de guardar.',
+            'destinos.required' => 'Añade al menos dos lugares registrados a tu ruta.',
             'paradas.min' => 'Tu ruta necesita al menos dos paradas.',
+            'fechaInicio.required' => 'Indica la fecha de inicio para mandar la solicitud.',
+            'fechaFin.required' => 'Indica la fecha de regreso para mandar la solicitud.',
         ]);
 
         if (in_array($request->session()->get('usuario.rol'), ['ADMIN', 'ADMINISTRATIVO'], true)) {
-            return redirect()->route('publico.inicio')->withErrors(['viaje' => 'Para guardar tu ruta, ingresa con una cuenta de cliente.']);
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'viaje' => 'Para usar el asistente de ruta, ingresa con una cuenta de cliente.',
+            ]);
         }
 
         $paradas = array_values(array_filter(array_map('trim', preg_split('/\s*·\s*|\r\n|\n/', $datos['destinos']) ?: [])));
+        $nombresRegistrados = collect(config('publico.inspiraciones', []))
+            ->map(fn (array $lugar) => mb_strtolower(trim((string) ($lugar['nombre'] ?? ''))))
+            ->filter()
+            ->values()
+            ->all();
+        $invalidas = array_values(array_filter($paradas, function (string $parada) use ($nombresRegistrados) {
+            return ! in_array(mb_strtolower($parada), $nombresRegistrados, true);
+        }));
+        if ($invalidas !== [] || count($paradas) < 2) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'destinos' => 'Solo puedes armar la ruta con lugares registrados del mapa.',
+            ]);
+        }
+
         $ruta = [
             ...$datos,
             'paradasLista' => $paradas,
@@ -161,15 +231,7 @@ class PublicoController extends Controller
             'intereses' => $this->documentoRutaTexto($ruta),
         ]);
 
-        if ($request->session()->get('usuario.rol') !== 'CLIENTE' || ! $request->session()->has('api_token')) {
-            return redirect()->route('acceso.registro')->with('exito', 'Guardamos tu ruta personalizada. Crea tu cuenta o ingresa para enviarla a tu asesor Thaki.');
-        }
-
-        $this->consultarApi('POST', '/api/cliente/mensajes', [
-            'contenido' => $this->documentoRutaTexto($ruta),
-        ]);
-
-        return redirect()->route('portal.mensajes')->with('exito', 'Enviamos tu ruta personalizada al chat con el asesor. También puedes abrir el documento de la ruta.');
+        return $ruta;
     }
 
     public function documentoRuta(Request $request): View|RedirectResponse
@@ -180,6 +242,23 @@ class PublicoController extends Controller
         }
 
         return view('publico.ruta-documento', ['ruta' => $ruta]);
+    }
+
+    public function descargarRuta(Request $request): Response|RedirectResponse
+    {
+        $ruta = $request->session()->get('ruta_personalizada');
+        if (! is_array($ruta)) {
+            return redirect()->route('publico.asistente')->withErrors(['viaje' => 'Todavía no hay una ruta guardada para documentar.']);
+        }
+
+        $titulo = (string) ($ruta['nombreRuta'] ?? 'Ruta personalizada');
+        $archivo = 'Thaki_Voyage_'.Str::slug($titulo, '_').'_'.now()->timezone('America/La_Paz')->format('Y-m-d').'.html';
+        $html = view('publico.ruta-documento-descarga', ['ruta' => $ruta])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$archivo.'"',
+        ]);
     }
 
     private function documentoRutaTexto(array $ruta): string

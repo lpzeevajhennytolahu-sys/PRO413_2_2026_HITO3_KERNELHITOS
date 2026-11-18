@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ asset('css/asistente.css') }}?v={{ filemtime(public_path('css/asistente.css')) }}" media="screen">
 @endpush
 @section('contenido')
+@include('components.avisos-publicos')
 <section class="ruta-app" data-asistente data-logueado="{{ session('usuario') ? '1' : '0' }}">
     <div class="ruta-mapa-wrap">
         <div id="asistente-mapa" class="ruta-mapa" role="application" aria-label="Mapa para crear tu ruta personalizada"></div>
@@ -17,7 +18,7 @@
             <datalist id="ruta-lugares-datalist">@foreach($lugares as $lugar)<option value="{{ $lugar['nombre'] }}">{{ $lugar['region'] }}</option>@endforeach</datalist>
         </form>
 
-        <div class="ruta-mapa-hint" data-ruta-hint>Haz clic en un lugar o en el mapa para ir armando tu ruta</div>
+        <div class="ruta-mapa-hint" data-ruta-hint>Haz clic solo en las bolitas registradas para armar tu ruta</div>
 
         <div class="ruta-mapa-tools">
             <button type="button" class="ruta-tool" data-ruta-deshacer title="Deshacer" aria-label="Deshacer">↶</button>
@@ -37,10 +38,6 @@
     <aside class="ruta-panel" data-ruta-panel>
         <div class="ruta-panel-top">
             <a class="ruta-icono" href="{{ route('publico.inicio') }}" aria-label="Volver">←</a>
-            <div class="ruta-modo" role="group" aria-label="Modo de edición">
-                <button type="button" class="activo" data-ruta-modo="basico">Básico</button>
-                <button type="button" data-ruta-modo="avanzado">Avanzado</button>
-            </div>
             <button type="button" class="ruta-icono" data-ruta-plegar aria-label="Plegar panel">⌃</button>
         </div>
 
@@ -149,7 +146,7 @@
 
             <div class="ruta-tab-panel" data-ruta-panel-puntos>
                 <ol class="ruta-puntos" data-ruta-puntos>
-                    <li class="ruta-puntos-vacio" data-ruta-vacio>Todavía no hay paradas. Elige un lugar registrado o haz clic en el mapa.</li>
+                    <li class="ruta-puntos-vacio" data-ruta-vacio>Todavía no hay paradas. Elige solo lugares registrados (las bolitas del mapa o la lista).</li>
                 </ol>
             </div>
 
@@ -182,31 +179,24 @@
             </div>
         </div>
 
-        <div class="ruta-panel-acciones">
-            <label class="ruta-add-select">
+        <form id="ruta-guardar-form" class="ruta-panel-acciones" method="POST" action="{{ route('publico.guardarRuta') }}" data-asistente-form>
+            @csrf
+            <input type="hidden" name="nombreRuta" value="Ruta personalizada" data-ruta-nombre-hidden>
+            <input type="hidden" name="destinos" value="{{ $formulario['destinos'] }}" data-ruta-destinos-hidden>
+            <input type="hidden" name="tipoRuta" value="{{ $formulario['tipoRuta'] ?: 'Senderismo' }}" data-ruta-tipo-hidden>
+            <input type="hidden" name="idea" value="" data-ruta-idea-hidden>
+            <input type="hidden" name="distanciaKm" value="0" data-ruta-distancia-hidden>
+            <input type="hidden" name="desnivelM" value="0" data-ruta-desnivel-hidden>
+            <input type="hidden" name="paradas" value="0" data-ruta-paradas-hidden>
+            <input type="hidden" name="hotel" value="{{ $formulario['hotel'] }}">
+            <input type="hidden" name="alimentacion" value="{{ $formulario['alimentacion'] }}">
+            <input type="hidden" name="transporte" value="{{ $formulario['transporte'] }}">
+            <button class="ruta-solicitar" type="submit" formaction="{{ route('publico.solicitarRuta') }}" data-ruta-solicitar disabled>
                 <span class="ruta-icono-add" aria-hidden="true">+</span>
-                <select data-ruta-agregar>
-                    <option value="">Añadir lugar registrado</option>
-                    @foreach($lugares as $lugar)
-                        <option value="{{ $lugar['slug'] }}">{{ $lugar['nombre'] }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <form id="ruta-guardar-form" method="POST" action="{{ route('publico.guardarRuta') }}" data-asistente-form>
-                @csrf
-                <input type="hidden" name="nombreRuta" value="Ruta personalizada" data-ruta-nombre-hidden>
-                <input type="hidden" name="destinos" value="{{ $formulario['destinos'] }}" data-ruta-destinos-hidden>
-                <input type="hidden" name="tipoRuta" value="{{ $formulario['tipoRuta'] ?: 'Senderismo' }}" data-ruta-tipo-hidden>
-                <input type="hidden" name="idea" value="" data-ruta-idea-hidden>
-                <input type="hidden" name="distanciaKm" value="0" data-ruta-distancia-hidden>
-                <input type="hidden" name="desnivelM" value="0" data-ruta-desnivel-hidden>
-                <input type="hidden" name="paradas" value="0" data-ruta-paradas-hidden>
-                <input type="hidden" name="hotel" value="{{ $formulario['hotel'] }}">
-                <input type="hidden" name="alimentacion" value="{{ $formulario['alimentacion'] }}">
-                <input type="hidden" name="transporte" value="{{ $formulario['transporte'] }}">
-                <button class="ruta-guardar" type="submit" data-ruta-guardar disabled>Guardar</button>
-            </form>
-        </div>
+                Mandar solicitud
+            </button>
+            <button class="ruta-guardar" type="submit" data-ruta-guardar disabled>Enviar mensaje</button>
+        </form>
     </aside>
 
     @unless(session('usuario'))

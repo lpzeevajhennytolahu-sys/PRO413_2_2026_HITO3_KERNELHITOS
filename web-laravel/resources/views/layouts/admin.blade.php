@@ -30,7 +30,8 @@
                 $inventarioActivo = request()->is('inventario*', 'investigacion-operativa*');
                 $enlaces = [
                     ['admin.index', 'Inicio', 'home', request()->routeIs('admin.index')],
-                    ['clientes.index', 'Clientes', 'users', request()->is('clientes*', 'atencion*')],
+                    ['atencion.index', 'Solicitudes', 'chat', request()->routeIs('atencion.index')],
+                    ['clientes.index', 'Clientes', 'users', request()->is('clientes*') || (request()->is('atencion*') && ! request()->routeIs('atencion.index'))],
                     ['inventario.operaciones', 'Inventario y almacén', 'box', $inventarioActivo],
                 ];
             @endphp

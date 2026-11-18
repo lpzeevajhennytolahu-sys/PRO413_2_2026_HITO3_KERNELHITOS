@@ -50,12 +50,27 @@ class PortalController extends Controller
 
     public function guardarPerfil(Request $request): RedirectResponse
     {
+        $codigosPais = ['+33', '+32', '+41', '+352', '+377', '+34', '+39', '+49', '+31', '+351', '+44', '+591', '+51', '+56', '+54', '+57', '+593', '+595', '+598', '+55', '+52', '+1'];
         $datos = $request->validate([
-            'nombres' => ['required', 'string', 'max:100'], 'apellidos' => ['required', 'string', 'max:100'],
-            'telefono' => ['nullable', 'string', 'max:30'], 'direccion' => ['nullable', 'string', 'max:200'],
-            'tipoDocumento' => ['nullable', 'string', 'max:20'], 'numeroDocumento' => ['nullable', 'string', 'max:30'],
-            'fechaNacimiento' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'genero' => ['nullable', 'string', 'max:20'],
+            'nombres' => ['required', 'string', 'max:100'],
+            'apellidos' => ['required', 'string', 'max:100'],
+            'codigoPais' => ['required', Rule::in($codigosPais)],
+            'telefonoNumero' => ['required', 'regex:/^\d{6,15}$/'],
+            'direccion' => ['required', 'string', 'min:5', 'max:200', 'regex:/^[\p{L}\p{N}\s.,#\-\/°ºª]+$/u'],
+            'tipoDocumento' => ['required', Rule::in(['Pasaporte', 'Carte d\'identité', 'Titre de séjour', 'DNI', 'NIE', 'CI'])],
+            'numeroDocumento' => ['required', 'string', 'max:30'],
+            'fechaNacimiento' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'genero' => ['nullable', 'in:Femenino,Masculino'],
+        ], [
+            'codigoPais.required' => 'Selecciona el código de país del teléfono.',
+            'telefonoNumero.required' => 'Ingresa tu número de teléfono.',
+            'telefonoNumero.regex' => 'El teléfono debe tener entre 6 y 15 dígitos, sin espacios ni signos.',
+            'direccion.required' => 'Ingresa tu dirección.',
+            'direccion.regex' => 'La dirección solo admite letras, números, espacios y los signos . , # - / °.',
+            'direccion.min' => 'La dirección debe tener al menos 5 caracteres.',
         ]);
+        $datos['telefono'] = $datos['codigoPais'].' '.$datos['telefonoNumero'];
+        unset($datos['codigoPais'], $datos['telefonoNumero']);
         $perfil = $this->consultarApi('PUT', '/api/cliente/perfil', $datos);
         if (($perfil['completitud']['completo'] ?? false) && $request->session()->pull('continuar_solicitud', false)) {
             return redirect()->route('portal.solicitud')->with('exito', 'Tu perfil está completo. Continúa con las preferencias de tu viaje.');

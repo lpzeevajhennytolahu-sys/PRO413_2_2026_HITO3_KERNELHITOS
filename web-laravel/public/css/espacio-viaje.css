@@ -12,6 +12,15 @@
     .estilo-liquid .viaje-contenido .portal-bienvenida h2 { font-size:29px; }
     .viaje-lateral { position:sticky; top:22px; }
     .perfil-progreso { padding:22px 24px; background:#f9fbff; border:1px solid #e0e8f3; border-radius:23px; margin-bottom:24px; }
+    .perfil-telefono { display:grid; gap:8px; }
+    .perfil-telefono-label { font:inherit; color:inherit; }
+    .perfil-telefono-campos { display:grid; grid-template-columns:minmax(140px,.9fr) minmax(0,1.2fr); gap:10px; }
+    .perfil-telefono-campos label { display:block; margin:0; }
+    .perfil-telefono small, .perfil-seccion label > small { display:block; margin-top:6px; color:#647c9c; font-size:11px; }
+    .visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media(max-width:700px) {
+        .perfil-telefono-campos { grid-template-columns:1fr; }
+    }
     .perfil-progreso-titulo { display:flex; align-items:center; justify-content:space-between; gap:20px; }
     .estilo-liquid .perfil-progreso h2 { font:600 16px/1.3 var(--liquid-font); margin:0; }
     .perfil-progreso strong { color:#2b5b82; font-size:17px; white-space:nowrap; }

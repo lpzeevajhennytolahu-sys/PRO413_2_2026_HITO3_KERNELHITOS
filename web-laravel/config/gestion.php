@@ -21,12 +21,23 @@ return [
         'fields' => [
             'nombres' => $campo('Nombres', 'required|string|max:100'),
             'apellidos' => $campo('Apellidos', 'required|string|max:100'),
-            'tipoDocumento' => $campo('Tipo de documento', 'nullable|string|max:20'),
+            'tipoDocumento' => $campo('Tipo de documento', 'nullable|in:Pasaporte,Carte d\'identité,Titre de séjour,DNI,NIE,CI', 'select', [
+                'options' => [
+                    'Pasaporte' => 'Pasaporte',
+                    'Carte d\'identité' => 'Carte d\'identité',
+                    'Titre de séjour' => 'Titre de séjour',
+                    'DNI' => 'DNI',
+                    'NIE' => 'NIE',
+                    'CI' => 'CI (cédula de identidad)',
+                ],
+            ]),
             'numeroDocumento' => $campo('Número de documento', 'nullable|string|max:30'),
             'email' => $campo('Correo electrónico', 'nullable|email|max:150', 'email'),
             'telefono' => $campo('Teléfono', 'nullable|string|max:30', 'tel'),
             'fechaNacimiento' => $campo('Fecha de nacimiento', 'nullable|date_format:Y-m-d|before_or_equal:today', 'date'),
-            'genero' => $campo('Género (opcional)', 'nullable|string|max:20'),
+            'genero' => $campo('Género (opcional)', 'nullable|in:Femenino,Masculino', 'select', [
+                'options' => ['Femenino' => 'Femenino', 'Masculino' => 'Masculino'],
+            ]),
             'direccion' => $campo('Dirección', 'nullable|string|max:200', 'textarea'),
         ],
     ],

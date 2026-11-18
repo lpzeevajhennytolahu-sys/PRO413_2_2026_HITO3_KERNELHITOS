@@ -185,27 +185,6 @@
         cursor: pointer;
         font-size: 16px;
     }
-    .ruta-modo {
-        display: flex;
-        padding: 3px;
-        border-radius: 999px;
-        background: #eef3f8;
-    }
-    .ruta-modo button {
-        border: 0;
-        border-radius: 999px;
-        padding: 7px 12px;
-        background: transparent;
-        color: #51657d;
-        font: 600 12px inherit;
-        cursor: pointer;
-    }
-    .ruta-modo button.activo {
-        background: #fff;
-        color: #152033;
-        box-shadow: 0 2px 8px #0f274014;
-    }
-
     .ruta-panel-scroll {
         overflow: auto;
         padding: 4px 16px 12px;
@@ -747,15 +726,23 @@
         border-top: 1px solid #e8eef4;
         background: #fff;
     }
-    .ruta-add-select {
+    .ruta-solicitar {
         position: relative;
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        justify-content: center;
+        gap: 8px;
         min-width: 0;
+        width: 100%;
+        border: 1px solid #d8e1eb;
+        border-radius: 999px;
+        padding: 10px 14px 10px 12px;
+        background: #f5f8fb;
+        color: #243447;
+        font: 600 12px inherit;
+        cursor: pointer;
     }
     .ruta-icono-add {
-        position: absolute;
-        left: 10px;
         width: 24px;
         height: 24px;
         border-radius: 50%;
@@ -764,17 +751,7 @@
         background: #eef7f1;
         color: #2f8f4e;
         font-size: 16px;
-        pointer-events: none;
-    }
-    .ruta-add-select select {
-        width: 100%;
-        border: 1px solid #d8e1eb;
-        border-radius: 999px;
-        padding: 10px 12px 10px 40px;
-        background: #f5f8fb;
-        color: #243447;
-        font: 12px inherit;
-        appearance: none;
+        flex: 0 0 auto;
     }
     .ruta-guardar {
         border: 0;
@@ -785,7 +762,9 @@
         font: 700 13px inherit;
         cursor: pointer;
         box-shadow: 0 8px 18px #2f8f4e33;
+        white-space: nowrap;
     }
+    .ruta-solicitar:disabled,
     .ruta-guardar:disabled {
         opacity: .45;
         cursor: not-allowed;
