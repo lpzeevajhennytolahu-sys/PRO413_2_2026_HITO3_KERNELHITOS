@@ -1,0 +1,36 @@
+package com.thakivoyage.resource;
+
+import java.util.Map;
+import com.thakivoyage.service.*;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("/api/atencion") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+public class AtencionResource {
+    @Inject AtencionService service;
+    @Inject AccesoService acceso;
+    private AccesoService.Identidad user(String header) {
+        var user=acceso.autenticar(header);
+        if(!java.util.Set.of("ADMIN","ADMINISTRATIVO").contains(user.rol()))throw new ForbiddenException();
+        return user;
+    }
+    @GET @Path("/panel") public Map<String,Object> panel(@HeaderParam("Authorization") String h){return service.panel(user(h));}
+    @GET @Path("/clientes") public java.util.List<Map<String,Object>> clientes(@HeaderParam("Authorization") String h){return service.clientes(user(h));}
+    @GET @Path("/clientes/{codigo}") public Map<String,Object> cliente(@HeaderParam("Authorization") String h,@PathParam("codigo") String codigo){return service.cliente(user(h),codigo);}
+    @POST @Path("/clientes/{codigo}/revisar") public void revisar(@HeaderParam("Authorization") String h,@PathParam("codigo") String codigo){service.revisarCliente(user(h),codigo);}
+    @POST @Path("/conversaciones/{id}/leer") public void leer(@HeaderParam("Authorization") String h,@PathParam("id") long id){service.leerConversacion(user(h),id);}
+    @GET @Path("/calendario") public java.util.List<Map<String,Object>> calendario(@HeaderParam("Authorization") String h,@QueryParam("desde") String desde,@QueryParam("hasta") String hasta){
+        var identidad=user(h);
+        try { return service.calendario(identidad,java.time.LocalDate.parse(desde==null?"":desde),java.time.LocalDate.parse(hasta==null?"":hasta)); }
+        catch(java.time.format.DateTimeParseException e){throw new BadRequestException("Indica fechas válidas para el calendario.");}
+    }
+    @GET @Path("/conversaciones/{id}") public Map<String,Object> conversacion(@HeaderParam("Authorization") String h,@PathParam("id")long id){return service.conversacion(user(h),id);}
+    @POST @Path("/conversaciones/{id}/mensajes") public void responder(@HeaderParam("Authorization")String h,@PathParam("id")long id,PortalService.Texto datos){service.responder(user(h),id,datos);}
+    @GET @Path("/solicitudes/{codigo}") public Map<String,Object> solicitud(@HeaderParam("Authorization")String h,@PathParam("codigo")String codigo){return service.solicitud(user(h),codigo);}
+    @POST @Path("/propuestas") public Map<String,Object> proponer(@HeaderParam("Authorization")String h,AtencionService.Propuesta datos){return service.proponer(user(h),datos);}
+    @POST @Path("/propuestas/{codigo}/aceptacion") public Map<String,String> aceptar(@HeaderParam("Authorization")String h,@PathParam("codigo")String codigo){return service.aceptar(user(h),codigo);}
+    @GET @Path("/reservas/{codigo}") public Map<String,Object> reserva(@HeaderParam("Authorization")String h,@PathParam("codigo")String codigo){return service.reserva(user(h),codigo);}
+    @POST @Path("/reservas/{codigo}/pagos") public Map<String,String> pago(@HeaderParam("Authorization")String h,@PathParam("codigo")String codigo,AtencionService.Pago datos){return service.registrarPago(user(h),codigo,datos);}
+    @POST @Path("/reservas/{codigo}/cancelacion") public void cancelar(@HeaderParam("Authorization")String h,@PathParam("codigo")String codigo){service.registrarCancelacion(user(h),codigo);}
+}
