@@ -3,22 +3,15 @@
 @section('titulo', ($editing ?? false) ? 'Editar producto' : 'Registrar producto')
 
 @section('contenido')
-    <div class="cabecera">
-        <div>
-            <p class="sobre-titulo">INVENTARIO</p>
-
-            <h1>{{ ($editing ?? false) ? 'Cada detalle, actualizado.' : 'El comienzo de un nuevo equipo.' }}</h1>
-
-            <p class="descripcion">
-                Define el producto. Después podrás registrar
-                cada unidad física con su código individual.
-            </p>
-        </div>
-
+    <x-page-header
+        eyebrow="INVENTARIO"
+        :title="($editing ?? false) ? 'Cada detalle, actualizado.' : 'El comienzo de un nuevo equipo.'"
+        description="Define el producto. Después podrás registrar cada unidad física con su código individual."
+    >
         <a class="boton boton-secundario" href="{{ route('inventario.index') }}">
             <x-icon name="back"/> Ver inventario
         </a>
-    </div>
+    </x-page-header>
 
     @if (session('exito'))
         <div class="aviso" role="status">
@@ -147,6 +140,22 @@
                         Para equipos identificados individualmente,
                         utiliza «Unidad».
                     </small>
+                </div>
+
+                <div>
+                    <label for="estadoFisico">Estado / condición *</label>
+                    <select id="estadoFisico" name="estadoFisico" required>
+                        <option value="">Selecciona el estado</option>
+                        @foreach([
+                            'NUEVO' => 'Nuevo',
+                            'SEMINUEVO' => 'Seminuevo',
+                            'USADO' => 'Utilizado',
+                            'VIEJO' => 'Viejo',
+                        ] as $valor => $etiqueta)
+                            <option value="{{ $valor }}" @selected(old('estadoFisico', $producto['estadoFisico'] ?? '') === $valor)>{{ $etiqueta }}</option>
+                        @endforeach
+                    </select>
+                    <small>Quedará como condición inicial al registrar las unidades físicas.</small>
                 </div>
             </div>
 

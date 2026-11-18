@@ -103,7 +103,17 @@
                         </div>
                         <div>
                             <label for="estadoFisico">Condición física *</label>
-                            <input id="estadoFisico" name="estadoFisico" maxlength="20" value="{{ old('estadoFisico') }}" placeholder="Ejemplo: BUENO" required>
+                            <select id="estadoFisico" name="estadoFisico" required>
+                                <option value="">Selecciona el estado</option>
+                                @foreach([
+                                    'NUEVO' => 'Nuevo',
+                                    'SEMINUEVO' => 'Seminuevo',
+                                    'USADO' => 'Utilizado',
+                                    'VIEJO' => 'Viejo',
+                                ] as $valor => $etiqueta)
+                                    <option value="{{ $valor }}" @selected(old('estadoFisico', session('estadoFisico_inicial')) === $valor)>{{ $etiqueta }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label for="calificacion">Calificación (opcional)</label>

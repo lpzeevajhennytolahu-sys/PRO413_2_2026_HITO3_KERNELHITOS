@@ -38,7 +38,7 @@ final class InventarioReglas {
     static boolean marcado(Object valor) { return Boolean.TRUE.equals(valor) || valor instanceof Number n && n.intValue()==1 || "1".equals(valor) || "true".equals(valor); }
     static String condicion(Map<String,Object> datos) {
         String s=texto(datos,"estadoFisico",20,true).toUpperCase(Locale.ROOT).replace("-","").replace(" ","");
-        if(!Set.of("NUEVO","SEMINUEVO","USADO").contains(s)) throw new BadRequestException("Selecciona Nuevo, Seminuevo o Usado.");
+        if(!Set.of("NUEVO","SEMINUEVO","USADO","VIEJO").contains(s)) throw new BadRequestException("Selecciona Nuevo, Seminuevo, Usado o Viejo.");
         return s;
     }
     static Integer calificacion(Object valor,boolean requerida) {

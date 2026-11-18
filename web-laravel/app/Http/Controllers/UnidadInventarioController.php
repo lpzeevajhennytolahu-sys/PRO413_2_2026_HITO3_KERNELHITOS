@@ -25,7 +25,7 @@ class UnidadInventarioController extends Controller
     {
         $datos = $request->validate([
             'codigoUnico' => ['required', 'string', 'max:50'], 'codAlmacen' => ['required', 'string', 'max:20'],
-            'estadoFisico' => ['required', 'string', 'max:20'], 'calificacion' => ['nullable', 'integer', 'between:1,10'],
+            'estadoFisico' => ['required', 'in:NUEVO,SEMINUEVO,USADO,VIEJO'], 'calificacion' => ['nullable', 'integer', 'between:1,10'],
             'fechaAlta' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'observaciones' => ['nullable', 'string', 'max:2000'],
             'requiereArreglo' => ['sometimes', 'boolean'], 'requiereCambio' => ['sometimes', 'boolean'], 'requiereBaja' => ['sometimes', 'boolean'],
@@ -78,7 +78,7 @@ class UnidadInventarioController extends Controller
         $datos = $request->validate([
             'codigoUnico' => ['required', 'string', 'max:50'],
             'codAlmacen' => ['required', 'string', 'max:20'],
-            'estadoFisico' => ['required', 'string', 'max:20'],
+            'estadoFisico' => ['required', 'in:NUEVO,SEMINUEVO,USADO,VIEJO'],
             'calificacion' => ['nullable', 'integer', 'between:1,10'],
             'fechaAlta' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'requiereArreglo' => ['sometimes', 'boolean'],

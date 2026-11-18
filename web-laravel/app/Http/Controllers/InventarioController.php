@@ -120,7 +120,10 @@ class InventarioController extends Controller
             'codUm' => ['required', 'string', 'max:10'],
             'modelo' => ['nullable', 'string', 'max:100'],
             'color' => ['nullable', 'string', 'max:80'],
+            'estadoFisico' => ['required', 'in:NUEVO,SEMINUEVO,USADO,VIEJO'],
         ]);
+        $estadoFisico = $datos['estadoFisico'];
+        unset($datos['estadoFisico']);
 
         try {
             $respuesta = Http::baseUrl(config('services.quarkus.url'))->withToken((string) session('api_token', ''))
@@ -141,6 +144,7 @@ class InventarioController extends Controller
 
             return redirect()
                 ->route('inventario.unidades', ['codigo' => $respuesta->json('codigo')])
+                ->with('estadoFisico_inicial', $estadoFisico)
                 ->with(
                     'exito',
                     'Producto registrado. Código: '

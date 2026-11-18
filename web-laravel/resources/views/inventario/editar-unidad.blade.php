@@ -15,7 +15,20 @@
                         @if ($unidad['codAlmacen'])<input type="hidden" name="codAlmacen" value="{{ $unidad['codAlmacen'] }}"><input id="codAlmacen" value="{{ $unidad['almacen'] }}" readonly>
                         @else<select id="codAlmacen" name="codAlmacen" required><option value="">Selecciona el almacén</option>@foreach ($almacenes as $almacen)<option value="{{ $almacen['codigo'] }}" @selected(old('codAlmacen') === $almacen['codigo'])>{{ $almacen['nombre'] }}</option>@endforeach</select>@endif
                     </div>
-                    <div><label for="estadoFisico">Condición física *</label><input id="estadoFisico" name="estadoFisico" value="{{ old('estadoFisico', $unidad['estadoFisico']) }}" maxlength="20" required></div>
+                    <div>
+                        <label for="estadoFisico">Condición física *</label>
+                        <select id="estadoFisico" name="estadoFisico" required>
+                            <option value="">Selecciona el estado</option>
+                            @foreach([
+                                'NUEVO' => 'Nuevo',
+                                'SEMINUEVO' => 'Seminuevo',
+                                'USADO' => 'Utilizado',
+                                'VIEJO' => 'Viejo',
+                            ] as $valor => $etiqueta)
+                                <option value="{{ $valor }}" @selected(old('estadoFisico', $unidad['estadoFisico'] ?? '') === $valor)>{{ $etiqueta }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div><label for="calificacion">Calificación (opcional)</label><input id="calificacion" name="calificacion" type="number" min="1" max="10" step="1" value="{{ old('calificacion', $unidad['calificacion']) }}"></div>
                     <div><label for="fechaAlta">Fecha de alta (si se conoce)</label><input id="fechaAlta" name="fechaAlta" type="date" max="{{ now()->toDateString() }}" value="{{ old('fechaAlta', $unidad['fechaAlta']) }}"></div>
                     <fieldset class="atencion-unidad"><legend>Atención requerida</legend>@foreach (['requiereArreglo' => 'Requiere arreglo', 'requiereCambio' => 'Requiere cambio', 'requiereBaja' => 'Solicitar baja'] as $campo => $label)<input type="hidden" name="{{ $campo }}" value="0"><label><input type="checkbox" name="{{ $campo }}" value="1" @checked(old($campo, $unidad[$campo]))> {{ $label }}</label>@endforeach</fieldset>
