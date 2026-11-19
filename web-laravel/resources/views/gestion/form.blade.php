@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('titulo', ($editing ? 'Editar ' : 'Registrar ').$meta['singular'])
 @section('contenido')
-    <x-page-header :title="($editing ? 'Editar ' : 'Registrar ').$meta['singular']" :description="$meta['description']" eyebrow="GESTIÓN · DATOS DEL REGISTRO">
+    <x-page-header :title="($editing ? 'Editar ' : 'Registrar ').$meta['singular']" :description="$meta['description']" eyebrow="ORGANIZACIÓN · DATOS DEL REGISTRO">
         <a class="boton boton-secundario" href="{{ route($meta['modulo'].'.index') }}"><x-icon name="back"/> {{ $meta['title'] }}</a>
     </x-page-header>
     @if (session('exito'))<div class="aviso" role="status">{{ session('exito') }}</div>@endif
@@ -12,7 +12,7 @@
         <div class="banda-contexto"><span class="icono-destacado"><x-icon name="users"/></span><div><strong>Primero, la persona.</strong><p>Selecciona una persona existente o registra sus datos personales antes de continuar.</p></div><a class="boton boton-secundario" href="{{ route('personas.create', ['volver' => $meta['modulo']]) }}">Registrar persona <x-icon name="plus"/></a></div>
     @endif
     @if ($meta['modulo'] === 'empleados')
-        <div class="enlaces-contexto"><a href="{{ route('cargos.index') }}">Gestionar cargos y responsabilidades <x-icon name="arrow"/></a><a href="{{ route('departamentos.index') }}">Gestionar departamentos <x-icon name="arrow"/></a></div>
+        <div class="enlaces-contexto"><a href="{{ route('cargos.index') }}">Administrar cargos y responsabilidades <x-icon name="arrow"/></a><a href="{{ route('departamentos.index') }}">Administrar departamentos <x-icon name="arrow"/></a></div>
         <p class="nota">El cargo describe su trabajo; las funciones indican si puede actuar como guía, asesor o conductor. Estas funciones no crean roles de acceso.</p>
     @endif
     <section class="formulario-panel">

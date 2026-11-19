@@ -33,6 +33,8 @@ class PanelNavigationTest extends TestCase
                 ['codEmpleado' => 'EMP-1', 'codPersona' => 'PER-1', 'estado' => 'ACTIVO', 'esGuia' => true],
             ]),
             '*/api/atencion/clientes' => Http::response([]),
+            '*/api/atencion/panel' => Http::response(['solicitudes' => [], 'conversaciones' => []]),
+            '*/api/atencion/calendario*' => Http::response([]),
             '*/api/v1/clientes' => Http::response([
                 ['codCliente' => 'CLI-1', 'codPersona' => 'PER-1', 'estado' => 'ACTIVO'],
             ]),
@@ -55,7 +57,7 @@ class PanelNavigationTest extends TestCase
             '/inventario/PRO-1/reposicion', '/inventario/productos/nuevo',
             '/personas', '/empleados', '/clientes', '/usuarios', '/roles'] as $ruta) {
             $this->get($ruta)->assertOk()->assertSee('id="navegacion-admin"', false)
-                ->assertSeeText('Volver al panel')->assertSeeText('Gestión')
+                ->assertSeeText('Volver al panel')->assertSeeText('Organización')
                 ->assertDontSee('cdn.tailwindcss.com', false);
         }
     }
@@ -82,7 +84,7 @@ class PanelNavigationTest extends TestCase
     public function test_inventario_tiene_apartado_propio_y_gestion_reune_personal_y_servicios(): void
     {
         $this->prepararApi();
-        $inicio = $this->get('/admin')->assertOk()->assertSeeText('Inventario y almacén')->assertSeeText('Recuento del Excel');
+        $inicio = $this->get('/admin')->assertOk()->assertSeeText('Inventario')->assertSeeText('Resultado')->assertSeeText('Clientes');
         $this->assertStringNotContainsString('hero-thaki', $inicio->getContent());
         $dom = new \DOMDocument;
         @$dom->loadHTML($inicio->getContent());
@@ -92,7 +94,7 @@ class PanelNavigationTest extends TestCase
         foreach ($menu as $enlace) {
             $destinos[] = parse_url($enlace->getAttribute('href'), PHP_URL_PATH);
         }
-        $this->assertSame(['/admin', '/clientes', '/inventario/operaciones', '/admin/gestion'], $destinos);
+        $this->assertSame(['/admin', '/atencion', '/clientes', '/inventario/operaciones', '/admin/gestion'], $destinos);
         $gestion = $this->get('/admin/gestion')->assertOk();
         foreach (['personas.index', 'empleados.index', 'cargos.index', 'departamentos.index', 'usuarios.index', 'roles.index', 'hoteles.index', 'servicios-transporte.index'] as $ruta) {
             $gestion->assertSee(route($ruta));

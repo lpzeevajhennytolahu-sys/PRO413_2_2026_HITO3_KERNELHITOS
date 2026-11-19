@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('titulo', ($confirmDelete ? 'Eliminar ' : 'Detalle de ').$meta['singular'])
 @section('contenido')
-    <x-page-header :title="($confirmDelete ? 'Eliminar ' : 'Detalle de ').$meta['singular']" :description="'Código: '.$registro[$meta['key']]" eyebrow="GESTIÓN · FICHA DEL REGISTRO">
+    <x-page-header :title="($confirmDelete ? 'Eliminar ' : 'Detalle de ').$meta['singular']" :description="'Código: '.$registro[$meta['key']]" eyebrow="ORGANIZACIÓN · FICHA DEL REGISTRO">
         <a class="boton boton-secundario" href="{{ route($meta['modulo'].'.index') }}"><x-icon name="back"/> {{ $meta['title'] }}</a>
         @if (! $confirmDelete && ($meta['canEdit'] ?? true))<a class="boton" href="{{ route($meta['modulo'].'.edit', ['codigo' => $registro[$meta['key']]]) }}">Editar datos</a>@endif
     </x-page-header>

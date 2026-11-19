@@ -378,7 +378,7 @@
         </tbody></table>
         <h2>3. Costos anuales estimados · BOB</h2>
         <table class="reporte-tabla reporte-ficha"><tbody>
-            @foreach (['costoCompraAnual' => 'Compra de unidades', 'costoOrdenarAnual' => 'Realización de pedidos', 'costoMantenerAnual' => 'Mantenimiento del inventario', 'costoGestionAnual' => 'Gestión (pedidos + mantenimiento)', 'costoTotalAnual' => 'TOTAL ANUAL ESTIMADO'] as $campo => $label)
+            @foreach (['costoCompraAnual' => 'Compra de unidades', 'costoOrdenarAnual' => 'Realización de pedidos', 'costoMantenerAnual' => 'Mantenimiento del inventario', 'costoGestionAnual' => 'Operación (pedidos + mantenimiento)', 'costoTotalAnual' => 'TOTAL ANUAL ESTIMADO'] as $campo => $label)
                 <tr><th scope="row">{{ $label }}</th><td class="numero-informe">{{ $formato($resultado[$campo]) }} BOB</td></tr>
             @endforeach
         </tbody></table>

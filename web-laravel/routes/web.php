@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminVlogController;
 use App\Http\Controllers\AtencionController;
 use App\Http\Controllers\GestionController;
 use App\Http\Controllers\InventarioController;
@@ -167,6 +168,9 @@ Route::middleware('sesion:personal')->group(function () {
     Route::view('/admin/gestion', 'admin.gestion')->name('admin.gestion');
     Route::get('/admin/lugares-visitados', [LugaresVisitadosController::class, 'index'])->name('admin.lugares-visitados');
     Route::post('/admin/lugares-visitados', [LugaresVisitadosController::class, 'guardar'])->name('admin.lugares-visitados.guardar');
+    Route::get('/admin/vlog', [AdminVlogController::class, 'index'])->name('admin.vlog');
+    Route::post('/admin/vlog/{id}/eliminar', [AdminVlogController::class, 'eliminarPublicacion'])->whereUuid('id')->name('admin.vlog.eliminar');
+    Route::post('/admin/vlog/{id}/comentarios/{comentario}/eliminar', [AdminVlogController::class, 'eliminarComentario'])->whereUuid(['id', 'comentario'])->name('admin.vlog.comentario.eliminar');
 
     Route::get(
         '/inventario/productos/nuevo',

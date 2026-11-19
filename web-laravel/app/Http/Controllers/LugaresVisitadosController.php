@@ -14,15 +14,24 @@ class LugaresVisitadosController extends Controller
         abort_unless(session('usuario.rol') === 'ADMIN', 403);
 
         $estados = LugaresVisitados::estados();
-        $lugares = collect(config('publico.inspiraciones', []))
-            ->map(fn (array $lugar, string $slug) => [
-                'slug' => $slug,
-                'nombre' => $lugar['nombre'],
-                'region' => $lugar['region'],
-                'imagen' => $lugar['imagen'],
-                'descripcion' => $lugar['descripcion'] ?? '',
-                'activo' => (bool) ($estados[$slug] ?? false),
-            ])
+        $catalogo = config('publico.inspiraciones', []);
+        $lugares = collect(LugaresVisitados::orden())
+            ->map(function (string $slug) use ($catalogo, $estados) {
+                $lugar = $catalogo[$slug] ?? null;
+                if (! $lugar) {
+                    return null;
+                }
+
+                return [
+                    'slug' => $slug,
+                    'nombre' => $lugar['nombre'],
+                    'region' => $lugar['region'],
+                    'imagen' => $lugar['imagen'],
+                    'descripcion' => $lugar['descripcion'] ?? '',
+                    'activo' => (bool) ($estados[$slug] ?? false),
+                ];
+            })
+            ->filter()
             ->values();
 
         return view('admin.lugares-visitados', [
@@ -35,9 +44,12 @@ class LugaresVisitadosController extends Controller
     {
         abort_unless(session('usuario.rol') === 'ADMIN', 403);
 
+        $slugs = array_keys(config('publico.inspiraciones', []));
         $request->validate([
             'activos' => ['nullable', 'array'],
-            'activos.*' => ['string', 'in:'.implode(',', array_keys(config('publico.inspiraciones', [])))],
+            'activos.*' => ['string', 'in:'.implode(',', $slugs)],
+            'orden' => ['nullable', 'array'],
+            'orden.*' => ['string', 'in:'.implode(',', $slugs)],
         ]);
 
         LugaresVisitados::guardar($request->all());

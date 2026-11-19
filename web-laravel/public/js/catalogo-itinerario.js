@@ -33,7 +33,7 @@
             selector.replaceChildren(new Option(lista.length ? 'Selecciona una opción' : 'No hay opciones activas para ofrecer', ''));
             lista.forEach((opcion, indice) => selector.append(new Option(opcion.label, String(indice))));
             selector.disabled = lista.length === 0;
-            estado.textContent = lista.length ? 'Elige una opción; puedes incluir más de una alternativa en el mismo día.' : 'Registra una opción activa desde Gestión o describe el servicio para confirmar con el cliente.';
+            estado.textContent = lista.length ? 'Elige una opción; puedes incluir más de una alternativa en el mismo día.' : 'Registra una opción activa desde Organización o describe el servicio para confirmar con el cliente.';
         } catch(error) { estado.textContent = error.message; }
     };
     document.addEventListener('toggle', event => {

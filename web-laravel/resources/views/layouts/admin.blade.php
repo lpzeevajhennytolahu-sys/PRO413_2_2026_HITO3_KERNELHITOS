@@ -26,7 +26,7 @@
         <button class="boton-menu" type="button" aria-expanded="true" aria-controls="navegacion-admin"><x-icon name="menu"/> Menú de navegación</button>
         <nav class="menu-admin" id="navegacion-admin" aria-label="Menú de administración">
             @php
-                $gestionActiva = request()->routeIs('admin.gestion', 'admin.lugares-visitados') || request()->is('personas*', 'empleados*', 'cargos*', 'departamentos*', 'usuarios*', 'roles*', 'hoteles*', 'habitaciones*', 'tarifas-hotel*', 'vehiculos*', 'conductores*', 'servicios-transporte*');
+                $gestionActiva = request()->routeIs('admin.gestion', 'admin.lugares-visitados', 'admin.vlog') || request()->is('personas*', 'empleados*', 'cargos*', 'departamentos*', 'usuarios*', 'roles*', 'hoteles*', 'habitaciones*', 'tarifas-hotel*', 'vehiculos*', 'conductores*', 'servicios-transporte*');
                 $inventarioActivo = request()->is('inventario*', 'investigacion-operativa*');
                 $enlaces = [
                     ['admin.index', 'Inicio', 'home', request()->routeIs('admin.index')],
@@ -40,7 +40,7 @@
                 <a href="{{ route($ruta) }}" @class(['activo' => $activo]) @if ($activo) aria-current="page" @endif><x-icon :name="$icono"/><span>{{ $texto }}</span>@if ($activo)<span class="nav-indicador"></span>@endif</a>
             @endforeach
             <div class="menu-gestion">
-                <a href="{{ route('admin.gestion') }}" @class(['activo' => $gestionActiva]) @if ($gestionActiva) aria-current="page" @endif><x-icon name="grid"/><span>Gestión</span>@if ($gestionActiva)<span class="nav-indicador"></span>@endif</a>
+                <a href="{{ route('admin.gestion') }}" @class(['activo' => $gestionActiva]) @if ($gestionActiva) aria-current="page" @endif><x-icon name="grid"/><span>Organización</span>@if ($gestionActiva)<span class="nav-indicador"></span>@endif</a>
                 <p>Equipo, servicios y accesos.</p>
             </div>
         </nav>
@@ -50,7 +50,7 @@
         <header class="barra-superior no-imprimir">
             <nav class="breadcrumb" aria-label="Ruta de navegación">
                 <a href="{{ route('admin.index') }}"><x-icon name="home"/><span>Panel</span></a>
-                @if ($gestionActiva && !request()->routeIs('admin.gestion'))<span aria-hidden="true">/</span><a href="{{ route('admin.gestion') }}">Gestión</a>@endif
+                @if ($gestionActiva && !request()->routeIs('admin.gestion'))<span aria-hidden="true">/</span><a href="{{ route('admin.gestion') }}">Organización</a>@endif
                 @if ($inventarioActivo && !request()->routeIs('inventario.operaciones'))<span aria-hidden="true">/</span><a href="{{ route('inventario.operaciones') }}">Inventario y almacén</a>@endif
                 @if (request()->route('modulo') && ! request()->routeIs(request()->route('modulo').'.index'))<span aria-hidden="true">/</span><a href="{{ route(request()->route('modulo').'.index') }}">{{ config('gestion.'.request()->route('modulo').'.title') }}</a>@endif
                 <span aria-hidden="true">/</span><strong aria-current="page">@yield('titulo', 'Administración')</strong>

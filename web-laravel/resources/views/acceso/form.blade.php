@@ -1,5 +1,5 @@
 @extends('layouts.publico')
-@php($titulos = ['ingresar' => 'Qué bueno verte de nuevo.', 'registrar' => 'Tu viaje comienza aquí.', 'inicializar' => 'Prepara la administración.'])
+@php($titulos = ['ingresar' => 'Bienvenido a tu viaje.', 'registrar' => 'Tu viaje comienza aquí.', 'inicializar' => 'Prepara la administración.'])
 @section('titulo', $titulos[$modo])
 @section('publico-clase', 'publico-con-cabecera')
 @section('contenido')

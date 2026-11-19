@@ -178,6 +178,60 @@ class Vlog
         return false;
     }
 
+    public static function eliminarPublicacion(string $id): bool
+    {
+        $posts = self::todos();
+        $quedan = [];
+        $eliminado = null;
+
+        foreach ($posts as $post) {
+            if (($post['id'] ?? '') === $id) {
+                $eliminado = $post;
+                continue;
+            }
+            $quedan[] = $post;
+        }
+
+        if ($eliminado === null) {
+            return false;
+        }
+
+        self::guardar($quedan);
+
+        $imagen = self::carpeta().DIRECTORY_SEPARATOR.($eliminado['imagen'] ?? '');
+        if (is_file($imagen)) {
+            @unlink($imagen);
+        }
+
+        return true;
+    }
+
+    public static function eliminarComentario(string $postId, string $comentarioId): bool
+    {
+        $posts = self::todos();
+        foreach ($posts as $i => $post) {
+            if (($post['id'] ?? '') !== $postId) {
+                continue;
+            }
+
+            $antes = count($post['comentarios'] ?? []);
+            $posts[$i]['comentarios'] = array_values(array_filter(
+                $post['comentarios'] ?? [],
+                fn (array $comentario): bool => ($comentario['id'] ?? '') !== $comentarioId
+            ));
+
+            if (count($posts[$i]['comentarios']) === $antes) {
+                return false;
+            }
+
+            self::guardar($posts);
+
+            return true;
+        }
+
+        return false;
+    }
+
     /** @param  array<string, mixed>  $post */
     private static function normalizar(array $post): array
     {

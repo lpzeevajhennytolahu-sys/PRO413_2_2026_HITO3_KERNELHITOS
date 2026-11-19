@@ -30,6 +30,18 @@ class LugaresVisitados
             return $defecto;
         }
 
+        // Formato nuevo: { estados: {...}, orden: [...] }
+        if (isset($guardado['estados']) && is_array($guardado['estados'])) {
+            foreach ($catalogo as $slug) {
+                if (array_key_exists($slug, $guardado['estados'])) {
+                    $defecto[$slug] = (bool) $guardado['estados'][$slug];
+                }
+            }
+
+            return $defecto;
+        }
+
+        // Formato anterior: { slug: bool }
         foreach ($catalogo as $slug) {
             if (array_key_exists($slug, $guardado)) {
                 $defecto[$slug] = (bool) $guardado[$slug];
@@ -40,9 +52,57 @@ class LugaresVisitados
     }
 
     /** @return list<string> */
+    public static function orden(): array
+    {
+        $catalogo = array_keys(config('publico.inspiraciones', []));
+        $archivo = self::ruta();
+        $ordenGuardado = [];
+
+        if (is_file($archivo)) {
+            $guardado = json_decode((string) file_get_contents($archivo), true);
+            if (is_array($guardado)) {
+                if (isset($guardado['orden']) && is_array($guardado['orden'])) {
+                    $ordenGuardado = $guardado['orden'];
+                } else {
+                    // Compatibilidad: activos en orden del catálogo según flags booleanos
+                    foreach ($catalogo as $slug) {
+                        if (! empty($guardado[$slug])) {
+                            $ordenGuardado[] = $slug;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($ordenGuardado === []) {
+            $ordenGuardado = config('publico.sugeridos', []);
+        }
+
+        $orden = [];
+        foreach ($ordenGuardado as $slug) {
+            if (is_string($slug) && in_array($slug, $catalogo, true) && ! in_array($slug, $orden, true)) {
+                $orden[] = $slug;
+            }
+        }
+
+        foreach ($catalogo as $slug) {
+            if (! in_array($slug, $orden, true)) {
+                $orden[] = $slug;
+            }
+        }
+
+        return $orden;
+    }
+
+    /** @return list<string> */
     public static function activos(): array
     {
-        return array_values(array_keys(array_filter(self::estados())));
+        $estados = self::estados();
+
+        return array_values(array_filter(
+            self::orden(),
+            fn (string $slug): bool => (bool) ($estados[$slug] ?? false)
+        ));
     }
 
     /** @param  array<string, mixed>  $entrada */
@@ -54,6 +114,24 @@ class LugaresVisitados
             ->unique()
             ->values()
             ->all();
+
+        $ordenEntrada = collect($entrada['orden'] ?? $seleccion)
+            ->filter(fn ($slug) => is_string($slug) && in_array($slug, $catalogo, true))
+            ->unique()
+            ->values()
+            ->all();
+
+        foreach ($seleccion as $slug) {
+            if (! in_array($slug, $ordenEntrada, true)) {
+                $ordenEntrada[] = $slug;
+            }
+        }
+
+        foreach ($catalogo as $slug) {
+            if (! in_array($slug, $ordenEntrada, true)) {
+                $ordenEntrada[] = $slug;
+            }
+        }
 
         $estados = array_fill_keys($catalogo, false);
         foreach ($seleccion as $slug) {
@@ -68,7 +146,10 @@ class LugaresVisitados
 
         file_put_contents(
             $archivo,
-            json_encode($estados, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n",
+            json_encode([
+                'estados' => $estados,
+                'orden' => array_values($ordenEntrada),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n",
             LOCK_EX
         );
     }

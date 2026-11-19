@@ -14,9 +14,9 @@
 <div class="oferta-pagina">
 <div class="portal-titulo"><div><span class="etiqueta">{{ $modo === 'hotel' ? 'DÓNDE DORMIR' : 'CÓMO MOVERTE' }}</span><h1>{{ $modo === 'hotel' ? 'Elige tu alojamiento' : 'Elige tu traslado' }}</h1><p>{{ $modo === 'hotel' ? 'Compara ciudad, habitación y precio por noche. Tu asesor confirmará la reserva.' : 'Elige el servicio. El equipo asigna el vehículo y el conductor.' }}</p></div><a class="enlace" href="{{ $enPortal ? route('portal.solicitud') : route('publico.inicio') }}">{{ $enPortal ? '← Volver a mi solicitud' : '← Inicio' }}</a></div>
 <nav class="oferta-cambio" aria-label="Catálogo de viaje"><a href="{{ route('publico.alojamientos') }}" @if($modo === 'hotel') aria-current="page" @endif>Alojamientos</a><a href="{{ route('publico.transporte') }}" @if($modo === 'transporte') aria-current="page" @endif>Traslados</a></nav>
-@if($esPersonal)<div class="aviso"><p>Catálogo que puede consultar el viajero. Gestiona sus opciones desde el panel del equipo.</p><div class="acciones"><a class="enlace" href="{{ route('admin.gestion') }}">← Gestión</a><a class="enlace" href="{{ route($modo === 'hotel' ? 'hoteles.index' : 'servicios-transporte.index') }}">{{ $modo === 'hotel' ? 'Gestionar alojamientos' : 'Gestionar traslados' }} ↗</a></div></div>@endif
+@if($esPersonal)<div class="aviso"><p>Catálogo que puede consultar el viajero. Administra sus opciones desde el panel del equipo.</p><div class="acciones"><a class="enlace" href="{{ route('admin.gestion') }}">← Organización</a><a class="enlace" href="{{ route($modo === 'hotel' ? 'hoteles.index' : 'servicios-transporte.index') }}">{{ $modo === 'hotel' ? 'Administrar alojamientos' : 'Administrar traslados' }} ↗</a></div></div>@endif
 @if($errorCatalogo)<p class="aviso error" role="alert">El catálogo no está disponible. Comprueba que Quarkus y MySQL estén en marcha.</p>
-@elseif($modo === 'hotel' && !count($hoteles))<p class="aviso">Todavía no hay alojamientos activos. El equipo puede registrarlos desde Gestión.</p>
+@elseif($modo === 'hotel' && !count($hoteles))<p class="aviso">Todavía no hay alojamientos activos. El equipo puede registrarlos desde Organización.</p>
 @elseif($modo === 'transporte' && !count($servicios))<p class="aviso">Todavía no hay traslados activos.</p>
 @endif
 @if($modo === 'hotel')

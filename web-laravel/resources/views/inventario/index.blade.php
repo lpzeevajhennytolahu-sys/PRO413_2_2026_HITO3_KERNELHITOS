@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('titulo', 'Inventario')
 @section('contenido')
-<x-page-header title="Listos para la aventura." description="Cada producto, cada equipo, cada detalle. Gestiona tu inventario desde un solo lugar." eyebrow="EQUIPAMIENTO · ALMACÉN PRINCIPAL">
+<x-page-header title="Listos para la aventura." description="Cada producto, cada equipo, cada detalle. Controla tu inventario desde un solo lugar." eyebrow="EQUIPAMIENTO · ALMACÉN PRINCIPAL">
     <a class="boton" href="{{ route('inventario.operaciones') }}">Operar almacén <x-icon name="arrow"/></a>
     <a class="boton boton-secundario" href="{{ route('inventario.abc') }}"><x-icon name="chart"/> Ver ABC</a>
     <a class="boton" href="{{ route('inventario.crear') }}"><x-icon name="plus"/> Registrar producto</a>

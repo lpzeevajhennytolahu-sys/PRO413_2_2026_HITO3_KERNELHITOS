@@ -1,8 +1,8 @@
 @extends('layouts.admin')
-@section('titulo', 'Gestión')
+@section('titulo', 'Organización')
 @section('clase-pagina', 'gestion-operaciones')
 @section('contenido')
-<header class="operaciones-cabecera"><div><p class="sobre-titulo">HERRAMIENTAS DEL EQUIPO</p><h1>Gestión</h1><p class="descripcion">Organización, accesos y análisis, cada uno en su lugar.</p></div></header>
+<header class="operaciones-cabecera"><div><p class="sobre-titulo">HERRAMIENTAS DEL EQUIPO</p><h1>Organización</h1><p class="descripcion">Personal, catálogos de viaje y accesos, cada uno en su lugar.</p></div></header>
 <div class="gestion-secciones">
     @foreach([
         ['titulo' => 'Personas y equipo', 'descripcion' => 'Las fichas y la organización del personal.', 'enlaces' => [
@@ -27,7 +27,8 @@
             'titulo' => 'Portada pública',
             'descripcion' => 'Contenido que ve el visitante en la web.',
             'enlaces' => [
-                ['admin.lugares-visitados', 'Lugares más visitados', 'Habilita o quita las sugerencias del carrusel en la portada.', 'mountain'],
+                ['admin.lugares-visitados', 'Lugares más visitados', 'Activa, oculta y ordena las sugerencias del carrusel en la portada.', 'mountain'],
+                ['admin.vlog', 'Moderación del vlog', 'Elimina publicaciones o comentarios subidos por los viajeros.', 'chat'],
             ],
         ]] : []),
     ] as $grupo)

@@ -137,7 +137,7 @@ class PrintFormattingTest extends TestCase
         ])->assertOk();
         [$xpath, $report] = $this->informe($response->getContent());
         $this->assertStringContainsString('11.180,00 BOB', $report->textContent);
-        $this->assertStringContainsString('Gestión (pedidos + mantenimiento)', $report->textContent);
+        $this->assertStringContainsString('Operación (pedidos + mantenimiento)', $report->textContent);
         $this->assertStringNotContainsString('USD', $report->textContent);
         $this->assertCount(3, $xpath->query('.//table', $report));
     }
